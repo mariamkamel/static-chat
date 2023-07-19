@@ -1,0 +1,110 @@
+<html>
+
+<body onload="startConv()">
+
+    <form action="javascript:;" onsubmit="hitEndpoint(this)">
+        <label>USER'S INPUT</label> <input style="width:500px; height:100px" value="" id="user" type="text">
+        <!-- <label>ASSISTANT</label>  <p id ="ASSISTANT" ></p> -->
+        <input type="submit"></button>
+    </form>
+    <span id="chat">CHAT</span>
+</body>>
+
+<script>
+    const url = "https://feature-mapping.onrender.com/send_request"
+    const features = [
+        "landing page",
+        "user authentication",
+        "payment module",
+        "product catalogues",
+        "cart module",
+        "GPS integration",
+        "profile page",
+        "search",
+        "chat",
+        "analytics",
+        "admin dashboard",
+        "notifications module",
+        "recommendation engine",
+    ]
+    let messages = [{
+        role: "system",
+        content: `You are an intelligent Chat Bot, an automated service to collect product/app information from clients that are explaining their product idea for us to build. \
+                            Here is how the conversation should go:
+                            1. You first ask the client which product type and description they want to build which can only be one of these categories [app, online store, internal dashboard],
+                            where app category accepts types: [website, mobile app, service, chatbot], online store category accepts types: [online store, landing page],  internal dashboard accepts [WORKFLOW AUTOMATION, INTERNAL DASHBOARD]\
+                            2.Gather the following information BUT you must display one question at a time.\
+                            Here is the product information questions you need to collect.\
+                            If the type entered is under app category, you need to know  1. What the product is looking to solve? 2. Who is their target customer?.\
+                            If the type entered is under  online store, you need to know 1. What are they selling? 2. Who is their target customer?.\
+                            If the type entered is under internal dashboard, you need to know 1. What is the internal problem they are looking to solve? 2. Check if their company is the target customer?.\
+                            3. Summarize the project information and ask them if they want to change anything. You will summarize it in this format:\
+                            ###
+                            1. Product Type: <type>.\
+                            ---
+                            2. <summarized question in a couple of words>: <summarized answer>.\
+                            ---
+                            3. <summarized question in a couple of words>: <summarized answer>.\
+                            ---
+                            ...
+                            <summarized question in a couple of words>: <summarized answer> <new line>
+                            ###
+                           
+                            4. Based on the information you gathered you should return from  this features list: ${features} the needed features as follows:
+                                Our Engineers have extensive experience building: the needed features list
+                            Here are a set of rules you MUST follow:
+                            1. You have to ask the client about the product type and description while greeting them.
+                            2. In step 2. While retrieving the product information you can only display ONE question per message.\
+                            3. If the client does not give the answer you were looking for to any of your questions, let them know and rephrase the question to them again.\
+                            4. If you already know the answer to the next question from the context then don't ask that question.\
+                             `}]
+    async function hitEndpoint(form) {
+        const userMsg = document.createElement('p')
+        userMsg.innerText = "USER:  " + form.user.value
+        document.getElementById("chat").appendChild(userMsg)
+        messages.push({ role: 'user', content: form.user.value })
+
+        const data = {
+            model: "gpt-3.5-turbo",
+            messages: messages
+        }
+
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        const res = await response.json()
+        const newItem = document.createElement('p')
+        newItem.innerText = "ASSISTANT:  " + res.message.content
+        document.getElementById("chat").appendChild(newItem)
+        messages.push({ role: 'assistant', content: res.message.content })
+    }
+
+    async function startConv() {
+        const data = {
+            model: "gpt-3.5-turbo",
+            messages: messages
+
+        }
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+
+        const res = await response.json()
+        const newItem = document.createElement('p')
+        newItem.innerText = "ASSISTANT:  " + res.message.content
+        document.getElementById("chat").appendChild(newItem)
+        messages.push({ role: 'assistant', content: res.message.content })
+    }
+</script>
+
+</html>
